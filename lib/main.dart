@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gk_app/database.dart';
+import 'package:gk_app/login_screen.dart';
+import 'package:gk_app/product_list_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,9 +35,10 @@ class MyApp extends StatelessWidget {
         //
         // This works for code too, not just values: Most code changes can be
         // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: LoginScreen(),
+      // home: const ProductListScreen(),
     );
   }
 }
