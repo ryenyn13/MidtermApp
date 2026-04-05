@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo; // Tránh trùng tên với các class khác
 import 'database.dart';
 import 'product_model.dart';
 
@@ -18,16 +17,32 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _priceController = TextEditingController();
   final _imageController = TextEditingController();
 
-  // Hàm xử lý đẩy dữ liệu lên DB
+  @override
+  void initState() {
+    super.initState();
+    // Lắng nghe mỗi khi gõ hoặc paste link thì vẽ lại màn hình
+    _imageController.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _idController.dispose();
+    _nameController.dispose();
+    _typeController.dispose();
+    _priceController.dispose();
+    _imageController.dispose();
+    super.dispose();
+  }
+
   Future<void> _insertData() async {
-    // 1. Lấy dữ liệu từ các ô nhập
     final id = _idController.text;
     final name = _nameController.text;
     final type = _typeController.text;
     final price = double.tryParse(_priceController.text) ?? 0;
     final image = _imageController.text;
 
-    // Kiểm tra nhanh xem đã nhập đủ chưa
     if (id.isEmpty || name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Vui lòng nhập ID và Tên sản phẩm!")),
@@ -35,7 +50,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       return;
     }
 
-    // 2. Tạo đối tượng Product mới
     final newProduct = Product(
       idsanpham: id,
       tensp: name,
@@ -44,18 +58,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
       hinhanh: image,
     );
 
-    // 3. Gọi hàm insert từ file mongodb.dart
     bool success = await MongoDatabase.insertProduct(newProduct);
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Đã thêm sản phẩm vào Database!")),
+        const SnackBar(content: Text("Đã thêm sản phẩm vào Database!")),
       );
-      // Đóng màn hình thêm và quay về danh sách
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Lỗi rồi, không thêm được!")),
+        const SnackBar(content: Text("Không thêm được sản phẩm!")),
       );
     }
   }
@@ -69,20 +81,45 @@ class _AddProductScreenState extends State<AddProductScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              TextField(controller: _idController, decoration: const InputDecoration(labelText: "Mã sản phẩm (idsanpham)")),
+              TextField(controller: _idController, decoration: const InputDecoration(labelText: "Mã sản phẩm")),
               const SizedBox(height: 10),
-              TextField(controller: _nameController, decoration: const InputDecoration(labelText: "Tên sản phẩm (tensp)")),
+              TextField(controller: _nameController, decoration: const InputDecoration(labelText: "Tên sản phẩm")),
               const SizedBox(height: 10),
-              TextField(controller: _typeController, decoration: const InputDecoration(labelText: "Loại sản phẩm (loaisp)")),
+              TextField(controller: _typeController, decoration: const InputDecoration(labelText: "Loại sản phẩm")),
               const SizedBox(height: 10),
-              TextField(controller: _priceController, decoration: const InputDecoration(labelText: "Giá (gia)"), keyboardType: TextInputType.number),
+              TextField(controller: _priceController, decoration: const InputDecoration(labelText: "Giá sản phẩm (VNĐ)"), keyboardType: TextInputType.number),
               const SizedBox(height: 10),
-              TextField(controller: _imageController, decoration: const InputDecoration(labelText: "Link hình ảnh (hinhanh)")),
+              TextField(controller: _imageController, decoration: const InputDecoration(labelText: "Link hình ảnh")),
+              
+              const SizedBox(height: 15), 
+              
+              // KHU VỰC HIỆN ẢNH XEM TRƯỚC
+              if (_imageController.text.isNotEmpty)
+                Container(
+                  height: 150, 
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey.shade100,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      _imageController.text,
+                      fit: BoxFit.contain, 
+                      errorBuilder: (context, error, stackTrace) => const Center(
+                        child: Text("Đang chờ link ảnh hợp lệ...", style: TextStyle(color: Colors.grey)),
+                      ),
+                    ),
+                  ),
+                ),
+                
               const SizedBox(height: 30),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
                 onPressed: _insertData,
-                child: const Text("LƯU VÀO DATABASE", style: TextStyle(fontSize: 18)),
+                child: const Text("LƯU", style: TextStyle(fontSize: 18)),
               ),
             ],
           ),

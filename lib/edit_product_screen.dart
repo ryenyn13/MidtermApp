@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mongo_dart/mongo_dart.dart' as mongo; // Tránh trùng tên với các class khác
-import 'database.dart';
+import 'package:gk_app/database.dart';
 import 'product_model.dart';
 
 class EditProductScreen extends StatefulWidget {
@@ -20,7 +19,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _priceController = TextEditingController();
   final _imageController = TextEditingController();
 
-  @override
+ @override
   void initState() {
     super.initState();
     // Khởi tạo giá trị cho các ô nhập liệu từ sản phẩm hiện tại
@@ -29,6 +28,12 @@ class _EditProductScreenState extends State<EditProductScreen> {
     _typeController.text = widget.product.loaisp;
     _priceController.text = widget.product.gia.toString();
     _imageController.text = widget.product.hinhanh;
+
+ 
+    // Lắng nghe sự thay đổi, mỗi khi bạn gõ hoặc paste link, nó sẽ báo app vẽ lại màn hình
+    _imageController.addListener(() {
+      setState(() {}); 
+    });
   }
 
   // Hàm xử lý đẩy dữ liệu lên DB
@@ -62,13 +67,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("✅ Đã cập nhật sản phẩm vào Database!")),
+        const SnackBar(content: Text("Đã cập nhật sản phẩm vào Database!")),
       );
       // Đóng màn hình thêm và quay về danh sách
       Navigator.pop(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("❌ Lỗi rồi, không cập nhật được!")),
+        const SnackBar(content: Text("Không cập nhật được sản phẩm!")),
       );
     }
   }
@@ -82,20 +87,41 @@ class _EditProductScreenState extends State<EditProductScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              TextField(controller: _idController, readOnly: true, decoration: const InputDecoration(labelText: "Mã sản phẩm (idsanpham)")),
+              TextField(controller: _idController, readOnly: true, decoration: const InputDecoration(labelText: "Mã sản phẩm")),
               const SizedBox(height: 10),
-              TextField(controller: _nameController, decoration: const InputDecoration(labelText: "Tên sản phẩm (tensp)")),
+              TextField(controller: _nameController, decoration: const InputDecoration(labelText: "Tên sản phẩm ")),
               const SizedBox(height: 10),
-              TextField(controller: _typeController, decoration: const InputDecoration(labelText: "Loại sản phẩm (loaisp)")),
+              TextField(controller: _typeController, decoration: const InputDecoration(labelText: "Loại sản phẩm ")),
               const SizedBox(height: 10),
-              TextField(controller: _priceController, decoration: const InputDecoration(labelText: "Giá (gia)"), keyboardType: TextInputType.number),
+              TextField(controller: _priceController, decoration: const InputDecoration(labelText: "Giá"), keyboardType: TextInputType.number),
               const SizedBox(height: 10),
-              TextField(controller: _imageController, decoration: const InputDecoration(labelText: "Link hình ảnh (hinhanh)")),
+              TextField(controller: _imageController, decoration: const InputDecoration(labelText: "Link hình ảnh")),
+              if (_imageController.text.isNotEmpty)
+                Container(
+                  height: 150, // Chiều cao khung ảnh
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey.shade100,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      _imageController.text,
+                      fit: BoxFit.contain, // Giữ nguyên tỷ lệ ảnh
+                      // Nếu link bị lỗi hoặc đang gõ dở, hiển thị dòng chữ này để không bị crash
+                      errorBuilder: (context, error, stackTrace) => const Center(
+                        child: Text("Đang chờ link ảnh hợp lệ...", style: TextStyle(color: Colors.grey)),
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 30),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
                 onPressed: _updateData,
-                child: const Text("LƯU VÀO DATABASE", style: TextStyle(fontSize: 18)),
+                child: const Text("LƯU", style: TextStyle(fontSize: 18)),
               ),
             ],
           ),

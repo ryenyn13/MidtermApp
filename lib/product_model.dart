@@ -3,7 +3,7 @@ class Product {
   final String tensp;
   final String loaisp;
   final double gia;
-  final String hinhanh; // Sẽ lưu dạng đường dẫn (URL) hoặc chuỗi Base64
+  final String hinhanh; 
 
   Product({
     required this.idsanpham,
@@ -13,7 +13,6 @@ class Product {
     required this.hinhanh,
   });
 
-  // Chuyển dữ liệu từ App thành Map để đưa lên MongoDB
   Map<String, dynamic> toMap() {
     return {
       'idsanpham': idsanpham,
@@ -24,7 +23,6 @@ class Product {
     };
   }
 
-  // Chuyển dữ liệu từ MongoDB về App
   factory Product.fromMap(Map<String, dynamic> map) {
     return Product(
       idsanpham: map['idsanpham'] ?? '',
