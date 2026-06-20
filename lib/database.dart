@@ -21,10 +21,10 @@ class MongoDatabase {
 // 1. Hàm THÊM sản phẩm
   static Future<bool> insertProduct(Product product) async {
     try {
-      var collection = getCollection('sanpham'); // 'sanpham' là tên collection (bảng) trong MongoDB của bạn
+      var collection = getCollection('sanpham'); 
       await collection.insert(product.toMap());
       print("Thêm sản phẩm thành công!");
-      return true; // Trả về true nếu thành công để giao diện biết
+      return true; 
     } catch (e) {
       print("Lỗi khi thêm: $e");
       return false;
